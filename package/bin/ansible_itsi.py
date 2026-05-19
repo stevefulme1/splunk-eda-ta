@@ -73,6 +73,21 @@ from ITOA.event_management.notable_event_utils import Audit
 #logger = getLogger(logger_name='itsi_ansible_alert')
 
 
+_SENSITIVE_KEYS = {"session_key", "basic_password", "token", "sasl_plain_password"}
+
+
+def _redact_sensitive(data):
+    """Return a copy of *data* with sensitive values masked for safe logging."""
+    if isinstance(data, dict):
+        return {
+            k: ("****" if k in _SENSITIVE_KEYS and v else _redact_sensitive(v))
+            for k, v in data.items()
+        }
+    if isinstance(data, list):
+        return [_redact_sensitive(item) for item in data]
+    return data
+
+
 class ITSIAnsibleAlert(CustomGroupActionBase):
     """
     Inherit from CustomGroupActionBase so we can:
@@ -86,7 +101,8 @@ class ITSIAnsibleAlert(CustomGroupActionBase):
             super(ITSIAnsibleAlert, self).__init__(settings, logger)
             session_key = self.get_session_key()
             update_dynamic_log_level(logger, session_key, "ansible_addon_for_splunk")
-            logger.debug("Initialized ITSIAnsibleAlert with settings: %s", json.dumps(self.settings))
+            logger.debug("Initialized ITSIAnsibleAlert with settings: %s",
+                         json.dumps(_redact_sensitive(self.settings)))
         except Exception as e:
             logger.exception("Error during initialization: %s", e)
             raise
@@ -99,7 +115,7 @@ class ITSIAnsibleAlert(CustomGroupActionBase):
             # 1) Grab user-specified config from alert_actions.conf.
             logger.info("Starting ITSIAnsibleAlert execution.")
             config = self.get_config()
-            logger.debug("[ITSIAnsibleAlert] Alert config: %s", json.dumps(config))
+            logger.debug("[ITSIAnsibleAlert] Alert config: %s", json.dumps(_redact_sensitive(config)))
 
             # For example, param.environment => "dev"
             # param.alert_type => "webhook"
@@ -127,7 +143,7 @@ class ITSIAnsibleAlert(CustomGroupActionBase):
                 session_key=session_key,
                 app_context="ansible_addon_for_splunk"
             )
-            logger.debug("[ITSIAnsibleAlert] Add-on config: %s", json.dumps(env_conf))
+            logger.debug("[ITSIAnsibleAlert] Add-on config: %s", json.dumps(_redact_sensitive(env_conf)))
 
             # 4) Gather episodes via self.get_group() => yields a dictionary for each row
             episodes = []
@@ -213,7 +229,10 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == '--execute':
         try:
             input_settings = sys.stdin.read()
-            logger.debug("Input settings: %s", input_settings)
+            try:
+                logger.debug("Input settings: %s", json.dumps(_redact_sensitive(json.loads(input_settings))))
+            except (json.JSONDecodeError, TypeError):
+                logger.debug("Input settings: <non-JSON, redacted>")
             action = ITSIAnsibleAlert(input_settings)
             action.execute()
         except Exception as e:

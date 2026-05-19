@@ -468,7 +468,7 @@
                             "type": "checkbox",
                             "label": "SSL Hostname Verification",
                             "help": "Check to enable hostname verification during SSL handshake.",
-                            "defaultValue": false
+                            "defaultValue": true
                         },
                         {
                             "field": "auth_type",

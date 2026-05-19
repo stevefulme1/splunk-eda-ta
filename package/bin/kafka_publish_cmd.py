@@ -147,7 +147,7 @@ class KafkaPublishCommand(StreamingCommand):
             "sasl_plain_username": self.get_config_value(env, "sasl_plain_username", optional=True),
             "sasl_plain_password": self.get_config_value(env, "sasl_plain_password", optional=True),
             "sasl_mechanism": "PLAIN" if security_protocol in ["SASL_PLAINTEXT", "SASL_SSL"] else None,
-            "ssl_check_hostname": False if security_protocol == "SASL_SSL" else None,
+            "ssl_check_hostname": True if security_protocol == "SASL_SSL" else None,
             "value_serializer": lambda x: json.dumps(x).encode('utf-8'),
             "batch_size": self.batch_size,
             "linger_ms": self.linger_ms,

@@ -184,7 +184,7 @@ async def send_data_webhook_async(
     if not url:
         raise ValueError("No 'webhook_endpoint' in environment config")
     # SSL verification
-    ssl_check = env_config.get("ssl_check_hostname", "false").lower()
+    ssl_check = env_config.get("ssl_check_hostname", "true").lower()
     verify_ssl = ssl_check in ["1", "true", "yes"]
     # Timeouts / Retry
     connect_timeout = float(env_config.get("connection_timeout", "10"))
