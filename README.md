@@ -41,3 +41,11 @@ Sending one or more events can be done in a variety of ways within Splunk:
 * Custom Command
 * ITSI Episode Alert Action
 * Enterprise Security Adaptive Response Action
+
+## Community
+
+- [Contributing](CONTRIBUTING.md) - How to contribute to this project
+- [Code of Conduct](CODE_OF_CONDUCT.md) - Ansible Community Code of Conduct
+- [Security Policy](SECURITY.md) - How to report security vulnerabilities
+- [License](COPYING) - GPL-3.0
+
